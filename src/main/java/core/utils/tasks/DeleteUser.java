@@ -10,18 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
 
-public class DeleteUser implements Runnable {
-
-    Integer userId;
-    VkApiClient apiClient;
-    GroupActor actor;
-    Random random;
+public class DeleteUser extends BaseTask implements Runnable {
 
     public DeleteUser(Integer userId, VkApiClient apiClient, GroupActor actor) {
-        this.userId = userId;
-        this.apiClient = apiClient;
-        this.actor = actor;
-        this.random = new Random();
+        super(userId, apiClient, actor);
     }
 
     @Override

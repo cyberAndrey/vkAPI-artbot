@@ -21,19 +21,13 @@ import java.util.List;
 import java.util.Random;
 
 
-public class AddNewPhoto implements Runnable {
-    Integer userId;
-    VkApiClient apiClient;
-    GroupActor actor;
-    Random random;
+public class AddNewPhoto extends BaseTask implements Runnable {
+
     UserActor user;
     String nick;
 
     public AddNewPhoto(Integer userId, VkApiClient apiClient, GroupActor actor, UserActor user) {
-        this.userId = userId;
-        this.apiClient = apiClient;
-        this.actor = actor;
-        this.random = new Random();
+        super(userId, apiClient, actor);
         this.user = user;
         try {
             ResultSet set = DataBase.getNick(userId.toString());

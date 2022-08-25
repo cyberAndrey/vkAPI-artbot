@@ -37,13 +37,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class Registration implements Runnable {
+public class Registration extends BaseTask implements Runnable {
 
-    Integer userId;
     Integer lastMessageId;
-    VkApiClient apiClient;
-    GroupActor actor;
-    Random random;
     Date created;
     Message ans;
     UserActor user;
@@ -52,13 +48,20 @@ public class Registration implements Runnable {
     String userName, nick;
     boolean anonymous;
 
-    public Registration(Integer userId, VkApiClient apiClient, GroupActor actor, UserActor userA) {
-        this.userId = userId;
-        this.apiClient = apiClient;
-        this.actor = actor;
-        this.random = new Random();
+//    public Registration(Integer userId, VkApiClient apiClient, GroupActor actor, UserActor userA) {
+//        this.userId = userId;
+//        this.apiClient = apiClient;
+//        this.actor = actor;
+//        this.random = new Random();
+//        this.created = new Date();
+//        this.user = userA;
+//    }
+
+
+    public Registration(Integer userId, VkApiClient apiClient, GroupActor actor, UserActor user) {
+        super(userId, apiClient, actor);
         this.created = new Date();
-        this.user = userA;
+        this.user = user;
     }
 
     @Override
@@ -200,14 +203,6 @@ public class Registration implements Runnable {
         }
     }
 
-    public String getNick(String msg){
-        String regex = "(\\S+)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(msg);
-        matcher.find();
-        return matcher.group(0);
-    }
-
     private boolean getAnswer(Integer lastMessageId) throws ApiException, ClientException {
         GetHistoryResponse historyQuery = apiClient.messages().getHistory(actor).userId(userId).execute();
         Integer msg = historyQuery.getItems().get(0).getId();
@@ -217,72 +212,5 @@ public class Registration implements Runnable {
         }
 
         return false;
-    }
-
-    public String createPOST(String uri, String filename) throws Exception {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost uploadFile = new HttpPost(uri);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.addTextBody("file1", "101010101010101010", ContentType.TEXT_PLAIN);
-
-// This attaches the file to the POST:
-        File f = new File(filename);
-        builder.addBinaryBody(
-                "file1",
-                new FileInputStream(f),
-                ContentType.APPLICATION_OCTET_STREAM,
-                f.getName()
-        );
-
-        HttpEntity multipart = builder.build();
-        uploadFile.setEntity(multipart);
-        CloseableHttpResponse response = httpClient.execute(uploadFile);
-        HttpEntity responseEntity = response.getEntity();
-        String str =  IOUtils.toString(responseEntity.getContent(), StandardCharsets.UTF_8);
-        str = str.replaceAll("\\\\", "");
-        return str;
-    }
-
-
-
-    public  List<SaveResponse> loadPhoto(String response, String caption, UserActor actor) throws Exception {
-        String serverRel = "\"server\":([\\d]+)";
-        String hashRel = "\"hash\":\"([\\w]+)\"";
-        String photosRel = "photos_list\":\"(.+?)\",\"aid";
-        Pattern pattern = Pattern.compile(serverRel);
-        Matcher matcher = pattern.matcher(response);
-        matcher.find();
-        int server = Integer.parseInt(matcher.group(1));
-        pattern = Pattern.compile(hashRel);
-        matcher = pattern.matcher(response);
-        matcher.find();
-        String hash = matcher.group(1);
-        pattern = Pattern.compile(photosRel);
-        matcher = pattern.matcher(response);
-        matcher.find();
-        String photosList = matcher.group(1);
-
-        List<SaveResponse> res = apiClient.photos().save(actor).caption("Имя автора: "+caption).albumId(280673016).groupId(206249029).server(server).photosList(photosList).hash(hash).execute();
-        return res;
-    }
-
-    public String downloadForURL(String ulr) {
-        Random rand = new Random();
-        String fileName = "static/test"+rand.nextInt(100)+".png";
-        try{
-            URL url = new URL(ulr);
-            InputStream inputStream = url.openStream();
-            OutputStream outputStream = new FileOutputStream(fileName);
-            byte[] buffer = new byte[2048];
-            int length = 0;
-            while ((length = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, length);
-            }
-            inputStream.close();
-            outputStream.close();
-
-        } catch(Exception ignored) {}
-        System.out.println("\n******" + fileName + "***\n");
-        return fileName;
     }
 }

@@ -22,27 +22,18 @@ import java.util.Random;
 import static core.utils.CreateKeyboard.createButton;
 import static core.utils.CreateKeyboard.createInlineKeyboard;
 
-public class ViewPhotos implements Runnable {
-    Integer userId;
+public class ViewPhotos extends BaseTask implements Runnable {
     String author;
-    VkApiClient apiClient;
-    GroupActor actor;
-    Random random;
     Message ans;
     Integer lastMessageId;
     Date created;
     String authorId;
 
     public ViewPhotos(Integer userId, VkApiClient apiClient, GroupActor actor, String author) {
-        this.userId = userId;
+        super(userId, apiClient, actor);
         this.author = author;
-        this.apiClient = apiClient;
-        this.actor = actor;
-        this.random = new Random();
         this.created = new Date();
-
         this.authorId = DataBase.checkUser(author);
-
     }
 
     @Override
@@ -52,7 +43,6 @@ public class ViewPhotos implements Runnable {
                 String id_cur = DataBase.checkUser(author);
                 if (id_cur != null) {
                     //DataBase.checkUser()
-
                     ResultSet photos = DataBase.getPhotosOfAuthor(authorId);
                     while (photos.next()) {
                         List<KeyboardButton> line1 = new LinkedList<>();
@@ -120,7 +110,6 @@ public class ViewPhotos implements Runnable {
                         break;
                 }
             } catch (SQLException | ApiException | ClientException | InterruptedException e) {}
-
         }
     }
 
@@ -131,7 +120,6 @@ public class ViewPhotos implements Runnable {
             ans = historyQuery.getItems().get(0);
             return true;
         }
-
         return false;
     }
 }
